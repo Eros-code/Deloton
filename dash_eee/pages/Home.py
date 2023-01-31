@@ -57,9 +57,5 @@ layout=html.Div(
         row,
         html.Hr(style={"width": "100%", "height": "5px"}),
     ]),
-    html.Div(
-            children=[
-                html.H3("RECENT RIDES", style={"text-align":"left", 'font-family': "Helvetica", 'color':"#8cd98c"}, className="display-1, text-decoration-underline"),
-    ]),
     html.Div(row2)
 ])
