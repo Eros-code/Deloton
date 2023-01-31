@@ -53,7 +53,7 @@ class Kafka:
         for i in range(amount):
             msg = consumer.poll(1.0)
             if msg:
-                self._print_msg(msg)
+                # self._print_msg(msg)
                 values.append(json.loads(msg.value().decode('utf-8')))
             
         return values
@@ -62,4 +62,5 @@ class Kafka:
 
 k = Kafka()
 # print(k._list_topics())
-data = k.get_data(amount=10)
+data = k.get_data(amount=100000)
+json.dump(data, open('data.json', 'w'))
