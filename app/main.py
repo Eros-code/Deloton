@@ -63,4 +63,4 @@ class Kafka:
 k = Kafka()
 # print(k._list_topics())
 data = k.get_data(amount=100000)
-json.dump(data, open('data.json', 'w'))
+json.dump(data, open('./Data/data.json', 'w'))
