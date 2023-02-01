@@ -4,7 +4,7 @@ import re
 import ast
 import datetime
 
-data_json = json.load(open('./Data/data.json', 'r'))
+data_json = data_json = json.load(open('Data/data.json', 'r'))
 
 def df_creation():
     data_regex = re.compile(r'{[\s\S]*}')
@@ -44,6 +44,18 @@ def df_creation():
 
 user_df, ride_df = df_creation()
 
-user_df.to_json('./Data/users_data.json')
-ride_df.to_json('./Data/ride_data.json')
-print(user_df)
+df1 = user_df.to_json(orient = 'records')
+df2 = ride_df.to_json(orient = 'records')
+
+parsed1 = json.loads(df1)
+parsed2 = json.loads(df2)
+
+user_json = json.dumps(parsed1, indent=4)
+
+ride_json = json.dumps(parsed2, indent=4)
+
+with open('Data/users_data.json', 'w') as f:
+  f.write(user_json)
+
+with open('Data/ride_data.json', 'w') as f:
+  f.write(ride_json)
