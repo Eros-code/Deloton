@@ -10,11 +10,11 @@ password = os.getenv("KAFKA_SECRET")
 
 
 class Kafka:
-    def __init__(self):
+    def __init__(self, group_id: str = 'triple-e-consumer'):
         self.kafka_topic_name = 'deloton'
         self.consumer: Consumer = Consumer({
             'bootstrap.servers': server,
-            'group.id': 'triple-e-consumer',
+            'group.id': group_id,
             'security.protocol': 'SASL_SSL',
             'sasl.mechanisms': 'PLAIN',
             'sasl.username': username,
@@ -62,4 +62,4 @@ class Kafka:
 
 k = Kafka()
 # print(k._list_topics())
-data = k.get_data(amount=10)
+data = k.get_data(amount=100)
