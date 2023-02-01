@@ -5,7 +5,7 @@ import ast
 import datetime
 from datetime import date
 
-data_json = json.load(open('data.json', 'r'))
+data_json = data_json = json.load(open('Data/data.json', 'r'))
 
 def df_creation():
     data_regex = re.compile(r'{[\s\S]*}')
@@ -30,7 +30,7 @@ def df_creation():
                 if name[0] in stop_words:
                     name.pop(0)
                 address = user_dict['address'].split(',')
-                user_row = [user_dict['user_id'], name[0], name[1], user_dict['gender'], address[0], address[1], address[-1], datetime.datetime.fromtimestamp(user_dict['date_of_birth']/1000), user_dict['email_address'], user_dict['height_cm'], user_dict['weight_kg'], datetime.datetime.fromtimestamp(user_dict['account_create_date']/1000)]
+                user_row = [user_dict['user_id'], name[0], name[1], user_dict['gender'], address[0], address[1], address[-1], str(datetime.datetime.fromtimestamp(user_dict['date_of_birth']/1000)), user_dict['email_address'], user_dict['height_cm'], user_dict['weight_kg'], str(datetime.datetime.fromtimestamp(user_dict['account_create_date']/1000))]
                 user_rows.append(user_row)
         elif 'Ride -' in log['log']:
             ride_data = numbers_regex.findall(log['log'])
@@ -45,5 +45,18 @@ def df_creation():
 
 user_df, ride_df = df_creation()
 
-user_df.to_json('./Data/users_data.json')
-ride_df.to_json('./Data/ride_data.json')
+df1 = user_df.to_json(orient = 'records')
+df2 = ride_df.to_json(orient = 'records')
+
+parsed1 = json.loads(df1)
+parsed2 = json.loads(df2)
+
+user_json = json.dumps(parsed1, indent=4)
+
+ride_json = json.dumps(parsed2, indent=4)
+
+with open('Data/users_data.json', 'w') as f:
+  f.write(user_json)
+
+with open('Data/ride_data.json', 'w') as f:
+  f.write(ride_json)
