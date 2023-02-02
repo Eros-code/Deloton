@@ -42,6 +42,7 @@ card = dbc.Card(
                     "make up the bulk of the card's content.",
                     className="card-text",
                 ),
+                dcc.Graph(id='example-graph')
             ]
         ),
     ],
@@ -52,11 +53,17 @@ row = html.Div(
     [
         dbc.Row(
             [
-                dbc.Col(html.H4("some text")),
-                dbc.Col(html.H4("some text")),
-                dbc.Col(html.H4("some text")),
+                dbc.Col(html.P("some text")),
+                dbc.Col(html.P("some text")),
+                dbc.Col(html.P("some text")),
             ]
         ),
+        dbc.Row(
+            [
+                dbc.Col(html.P("some text")),
+                dbc.Col(html.P("some text")),
+                dbc.Col(html.P("some text")),
+            ])
     ]
 )
 
@@ -81,16 +88,8 @@ layout1=html.Div(
             html.Br(),
             dbc.Row( [
                 dbc.Col(html.Div(html.H1("CURRENT RIDE", className="display-1, text-decoration-underline", style={'text-align':'center','font-family': "Helvetica", 'color':"#8cd98c"}))),
-                dbc.Col(dropdowns)])], style={'background-color': '#303030'}),
+                dbc.Col(html.Div(children=[dropdowns, html.Br(), row]))])], style={'background-color': '#303030'}),
                 html.Hr(style={"width": "56%", "height": "10px"}),
-        html.Br(),
-    html.Div(children=[
-        html.Hr(style={"width": "100%", "height": "5px"}),
-        row,
-        row,
-        html.Hr(style={"width": "100%", "height": "5px"}),
-    ]),
-
     html.Br(),
     html.Div(row2)
 ])

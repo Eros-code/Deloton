@@ -1,4 +1,4 @@
-from dash import Dash, html, Input, Output
+from dash import Dash, html, Input, Output, dcc
 from dash_bootstrap_templates import load_figure_template
 import dash
 import plotly.express as px
@@ -17,6 +17,7 @@ card = dbc.Card(
                     "make up the bulk of the card's content.",
                     className="card-text",
                 ),
+                dcc.Graph(id='example-graph')
             ]
         ),
     ],
@@ -61,6 +62,6 @@ layout2=html.Div(
         html.Br(),
     html.Div(children=[
 
-    html.Br()]),
+    ]),
     html.Div(row2)
 ])
