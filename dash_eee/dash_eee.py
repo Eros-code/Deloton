@@ -6,8 +6,6 @@ import dash_bootstrap_components as dbc
 
 image_path='assets/deloton.png'
 
-dash_app = Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.CYBORG], suppress_callback_exceptions=True)
-
 dash_app = Dash(name=__name__, use_pages=True, routes_pathname_prefix="/dashapp/", external_stylesheets=[dbc.themes.CYBORG], suppress_callback_exceptions=True)
 navbar = dbc.NavbarSimple(
     children=[
