@@ -5,3 +5,4 @@ pandas-stubs
 plotly
 confluent-kafka
 python-dotenv
+clicksend_client
