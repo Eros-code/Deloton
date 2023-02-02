@@ -1,12 +1,12 @@
-from dash import dcc, html, Output, Input, callback
+from dash import Dash, html, Input, Output
+from dash_bootstrap_templates import load_figure_template
 import dash
 import plotly.express as px
-import pandas as pd
 import dash_bootstrap_components as dbc
 
-dash.register_page(__name__, path='/warehouse')
 
-image_path='assets/deloton.png'
+
+image_path='https://user-images.githubusercontent.com/5181870/188019461-4a27a045-9301-4931-910c-b367f7b2709a.png'
 card = dbc.Card(
     [
         dbc.CardBody(
@@ -32,7 +32,7 @@ row = html.Div(
                 dbc.Col(html.H4("some text")),
             ]
         ),
-    ]
+    ], style = {'background-color': '#303030'}
 )
 
 row2 = html.Div(
@@ -48,16 +48,19 @@ row2 = html.Div(
 )
 
 
-layout=html.Div(
+layout2=html.Div(
     children=[
-        html.Img(src=image_path, style={'width':'30%', 'height':'50%', "float":"right"}),
-        html.H1("RECENT RIDES", className="display-1, text-decoration-underline", style={'text-align':'center', 'font-family': "Helvetica", 'color':"#8cd98c"}),
+        html.Img(src=image_path, style={'width':'44%', 'height':'50%', "float":"right"}),
+        html.Hr(style={"width": "56%", "height": "7px"}),
         html.Div(className='container', children=[
-            row]),
-        html.Hr(style={"width": "100%", "height": "5px"}),
+            html.Br(),
+            dbc.Row( [
+                dbc.Col(html.Div(html.H1("RECENT RIDES", className="display-1, text-decoration-underline", style={'text-align':'center','font-family': "Helvetica", 'color':"#8cd98c"}))),
+                dbc.Col()])], style={'background-color': '#303030'}),
+                html.Hr(style={"width": "56%", "height": "10px"}),
+        html.Br(),
     html.Div(children=[
-        row,
-        html.Hr(style={"width": "100%", "height": "5px"}),
-    ]),
+
+    html.Br()]),
     html.Div(row2)
 ])

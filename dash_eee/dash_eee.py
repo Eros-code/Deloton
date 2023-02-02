@@ -6,20 +6,13 @@ import dash_bootstrap_components as dbc
 
 image_path='assets/deloton.png'
 
-app = Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.CYBORG], suppress_callback_exceptions=True)
-pages = list(dash.page_registry.values())
+dash_app = Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.CYBORG], suppress_callback_exceptions=True)
 
+dash_app = Dash(name=__name__, use_pages=True, routes_pathname_prefix="/dashapp/", external_stylesheets=[dbc.themes.CYBORG], suppress_callback_exceptions=True)
 navbar = dbc.NavbarSimple(
     children=[
-        dbc.NavItem(dbc.NavLink("Current-Ride", href="/")),
-        dbc.DropdownMenu(
-            children=[
-                dbc.DropdownMenuItem("More pages", header=True),
-                dbc.DropdownMenuItem(f"{pages[0]['name']}", href=pages[0]['relative_path'], active="exact"),
-            ],
-            nav=True,
-            label="More",
-        ),
+        dbc.NavItem(dbc.NavLink("Current-Ride", href="/dashapp/current-ride")),
+        dbc.NavItem(dbc.NavLink("Recent-Rides", href="/dashapp/recent-rides")),
     ],
     brand="Navigation",
     color="#8cd98c",
@@ -28,15 +21,16 @@ navbar = dbc.NavbarSimple(
 
 content = html.Div(id="page-content")
 
-app.layout= html.Div([dcc.Location(id="url"), navbar, content])
+dash_app.layout=html.Div([dcc.Location(id="url"), navbar, content])
 
-from pages import warehouse, Home
-@app.callback(Output("page-content", "children"), [Input("url", "pathname")])
+from pages.warehouse import layout2
+from pages.Home import layout1
+@dash_app.callback(Output("page-content", "children"), [Input("url", "pathname")])
 def render_page_content(pathname):
-    if pathname == "/":
-        return Home.layout
-    elif pathname == "/warehouse":
-        return warehouse.layout
+    if pathname == "/dashapp/" or pathname == "/dashapp/current-ride":
+        return layout1
+    elif pathname == "/dashapp/recent-rides":
+        return layout2
     # If the user tries to reach a different page, return a 404 message
     return html.Div(
         [
@@ -48,5 +42,5 @@ def render_page_content(pathname):
     )
 
 if __name__ == "__main__":
-    app.run_server(host="0.0.0.0", debug=True, port=8080)
+    dash_app.run_server(host="0.0.0.0", debug=True, port=8080)
 
