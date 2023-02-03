@@ -13,6 +13,7 @@ def df_creation():
     existing_user = set()
     user_rows = []
     ride_rows = []
+    session_id = 0
     for log in data_json:
         if 'Getting user data from server' in log['log']:
             start_date = log['log'].split(' ')[0]
@@ -20,6 +21,7 @@ def df_creation():
             start_month = start_date.split('-')[1]
             start_day = start_date.split('-')[2]
             start_time = log['log'].split(' ')[1]
+            session_id += 1
         if 'data = ' in log['log']:
             data = data_regex.findall(log['log'])
             user_dict = ast.literal_eval(data[0])
@@ -35,11 +37,11 @@ def df_creation():
             ride_data = numbers_regex.findall(log['log'])
         elif 'Telemetry -' in log['log']:
             telemetry_data = numbers_regex.findall(log['log'])
-            ride_row = [user_dict['user_id'], start_year, start_month, start_day, start_time, user_dict['bike_serial'], user_dict['original_source'], ride_data[-2], ride_data[-1], telemetry_data[-3], telemetry_data[-2], telemetry_data[-1], user_dict['height_cm'], user_dict['weight_kg'], datetime.datetime.now().year - datetime.datetime.fromtimestamp(user_dict['date_of_birth']/1000).year]
+            ride_row = [session_id, user_dict['user_id'], start_year, start_month, start_day, start_time, user_dict['bike_serial'], user_dict['original_source'], ride_data[-2], ride_data[-1], telemetry_data[-3], telemetry_data[-2], telemetry_data[-1], user_dict['height_cm'], user_dict['weight_kg'], datetime.datetime.now().year - datetime.datetime.fromtimestamp(user_dict['date_of_birth']/1000).year, user_dict['gender']]
             ride_rows.append(ride_row)
 
     user_df = pd.DataFrame(user_rows, columns=['user_id', 'first_name', 'last_name', 'gender', 'street', 'area', 'postcode', 'd_o_b', 'email', 'height', 'weight', 'account_creation_date'])
-    ride_df = pd.DataFrame(ride_rows, columns=['user_id', 'start_year', 'start_month', 'start_day', 'start_time', 'serial_no', 'source', 'duration', 'resistance', 'heart_rate', 'rpm', 'power', 'height', 'weight', 'age'])
+    ride_df = pd.DataFrame(ride_rows, columns=['session_id', 'user_id', 'start_year', 'start_month', 'start_day', 'start_time', 'serial_no', 'source', 'duration', 'resistance', 'heart_rate', 'rpm', 'power', 'height', 'weight', 'age', 'gender'])
     return user_df, ride_df
 
 user_df, ride_df = df_creation()
