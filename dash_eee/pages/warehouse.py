@@ -3,36 +3,50 @@ from dash_bootstrap_templates import load_figure_template
 import dash
 import plotly.express as px
 import dash_bootstrap_components as dbc
+## libraries needed to run dash app
+
 import os
 import json
+## os needed to obtain working directory
+
+## libraries needed to process postcodes into locations for plotting on map
 import pandas as pd
 import pgeocode
 from datetime import timedelta, datetime
 
+## setting postcode processor to gb
 nomi = pgeocode.Nominatim('gb')
 
 
+## moving back from current directory to be able to access the Data folder
 old_path = os.getcwd()
 os.chdir("..")
 
 print(os.getcwd())
 
+## importing the data from local file 'data' needs to be accessed from rds or s3 bucket
+## right now posing a security risk
+
 new_path1 = os.getcwd() + '/app/Data/ride_data.json'
 new_path2 = os.getcwd() + '/app/Data/users_data.json'
 
-
+## set colours to black and green (same as company logo)
 night_colors = ['#303030', '#8cd98c']
 
 user_df = pd.read_json(new_path2)
 ride_df = pd.read_json(new_path1)
 
+## convert postcodes to latitude and longitude
 user_df["latitude"] = user_df["postcode"].apply(lambda x: nomi.query_postal_code(x[:-3])[9])
 user_df["longitude"] = user_df["postcode"].apply(lambda x: nomi.query_postal_code(x[:-3])[10])
 
 os.chdir(old_path)
 
 
+## get the past 12 hours of data
 recent_rides_df = ride_df[(ride_df['start_time'] > datetime.now() - timedelta(hours = 12)) & (ride_df['start_time'] < datetime.now())]
+
+## find max and mean counts for recent rides split into male and female
 
 max_individual_recent_rides = recent_rides_df.groupby(['start_time']).max()
 mean_individual_recent_rides = recent_rides_df.groupby(['start_time']).mean()
@@ -41,7 +55,12 @@ max_individual_rides_female = max_individual_recent_rides[max_individual_recent_
 
 gender_counts = pd.DataFrame([['Male', len(max_individual_rides_male)], ['Female', len(max_individual_rides_female)]], columns = ['Gender', 'Count'])
 
+
+## creating a list for the dropdown choice allowing for visualization 
+
 choice_list_gender = ['Both', 'Male', 'Female']
+
+##### creating graphs for now in this file but maybe look into moving to a different
 
 fig1 = px.pie(gender_counts, values='Count', names='Gender', title='Number of Recent Rides per Gender')
 fig1.update_traces(marker_colors=night_colors)
@@ -70,208 +89,74 @@ fig7.update_layout(mapbox_style="open-street-map")
 fig7.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
 
 image_path='https://user-images.githubusercontent.com/5181870/188019461-4a27a045-9301-4931-910c-b367f7b2709a.png'
-card1 = dbc.Card(
-    [
-        dbc.CardBody(
-            [
-                html.H4("Card title", className="card-title"),
-                html.P(
-                    "Some quick example text to build on the card title and "
-                    "make up the bulk of the card's content.",
-                    className="card-text",
-                ),
-            dcc.Graph(id='example-graph1', figure=fig1)
-            ]
-        ),
-    ],
-    style={"width": "29rem", "height":'40rem'},
-)
 
-card2 = dbc.Card(
-    [
-        dbc.CardBody(
+
+## creating a function which initializes a card allowing for a graph to displayed
+
+def card_creator(card_title:str, card_text:str, graph_id:str, figure:str, dropdown:bool, dropdown_options=None, dropdown_id=None):
+    """
+    This function allows you to initialise a card that displays a graph
+    
+    """
+
+    ## if dropdown graph is initialized without a dropdown else initialize with dropdown
+    if dropdown == False:
+        card = dbc.Card(
             [
-                html.H4("Card title", className="card-title"),
-                html.P(
-                    "Some quick example text to build on the card title and "
-                    "make up the bulk of the card's content.",
-                    className="card-text",
+                dbc.CardBody(
+                    [
+                        html.H4(card_title, className="card-title"),
+                        html.P(
+                            card_text,
+                            className="card-text",
+                        ),
+                    dcc.Graph(id=graph_id, figure=figure)
+                    ]
                 ),
-                dcc.Dropdown(
-                    id='genders1',
-                    options=choice_list_gender,
+            ],
+            style={"width": '29rem', "height":'40rem'},
+        )
+    elif dropdown == True:
+        card = dbc.Card(
+            [
+                dbc.CardBody(
+                    [
+                        html.H4(card_title, className="card-title"),
+                        html.P(
+                            card_text,
+                            className="card-text",
+                        ),
+                    dcc.Dropdown(
+                    id=dropdown_id,
+                    options=dropdown_options,
                     style={
-                "background": "#8cd98c",
-            },
+                    "background": "#8cd98c",
+                    },
                     value="Both",
                     clearable=False
+                    ),
+                    dcc.Graph(id=graph_id, figure=figure)
+                    ]
                 ),
-            dcc.Graph(id='example-graph2')
-            ]
-        ),
-    ],
-    style={"width": "29rem", "height":'40rem'},
-)
+            ],
+            style={"width": '29rem', "height":'40rem'},
+        )
+    return card
 
-card3 = dbc.Card(
-    [
-        dbc.CardBody(
-            [
-                html.H4("Card title", className="card-title"),
-                html.P(
-                    "Some quick example text to build on the card title and "
-                    "make up the bulk of the card's content.",
-                    className="card-text",
-                ),
-                dcc.Dropdown(
-                    id='genders2',
-                    options=choice_list_gender,
-                    style={
-                "background": "#8cd98c",
-            },
-                    value="Both",
-                    clearable=False
-                ),
-            dcc.Graph(id='example-graph3')
-            ]
-        ),
-    ],
-    style={"width": "29rem", "height":'40rem'},
-)
 
-card4 = dbc.Card(
-    [
-        dbc.CardBody(
-            [
-                html.H4("Card title", className="card-title"),
-                html.P(
-                    "Some quick example text to build on the card title and "
-                    "make up the bulk of the card's content.",
-                    className="card-text",
-                ),
-            dcc.Graph(id='example-graph4', figure=fig4)
-            ]
-        ),
-    ],
-    style={"width": "29rem", "height":'40rem'},
-)
+## {} means it is an empty figure - this is handled in the main script which updates the figure
+card1 = card_creator(card_title='title', card_text='placeholder text', graph_id='example-graph1', figure=fig1, dropdown=False)
+card2 = card_creator(card_title='title', card_text='placeholder text', graph_id='example-graph2', figure={}, dropdown=True, dropdown_options=choice_list_gender, dropdown_id='genders1')
+card3 = card_creator(card_title='title', card_text='placeholder text', graph_id='example-graph3', figure={}, dropdown=True, dropdown_options=choice_list_gender, dropdown_id='genders2')
+card4 = card_creator(card_title='title', card_text='placeholder text', graph_id='example-graph4', figure=fig4, dropdown=False)
+card5 = card_creator(card_title='title', card_text='placeholder text', graph_id='example-graph5', figure={}, dropdown=True, dropdown_options=choice_list_gender, dropdown_id='genders3')
+card6 = card_creator(card_title='title', card_text='placeholder text', graph_id='example-graph6', figure={}, dropdown=True, dropdown_options=choice_list_gender, dropdown_id='genders4')
+card7 = card_creator(card_title='title', card_text='placeholder text', graph_id='delivery-map', figure=fig7,  dropdown=False)
+card8 = card_creator(card_title='title', card_text='placeholder text', graph_id='example-graph7', figure={}, dropdown=False)
+card9 = card_creator(card_title='title', card_text='placeholder text', graph_id='example-graph8', figure={}, dropdown=False)
 
-card5 = dbc.Card(
-    [
-        dbc.CardBody(
-            [
-                html.H4("Card title", className="card-title"),
-                html.P(
-                    "Some quick example text to build on the card title and "
-                    "make up the bulk of the card's content.",
-                    className="card-text",
-                ),
-                dcc.Dropdown(
-                    id='genders3',
-                    options=choice_list_gender,
-                    style={
-                "background": "#8cd98c",
-            },
-                    value="Both",
-                    clearable=False
-                ),
-            dcc.Graph(id='example-graph5')
-            ]
-        ),
-    ],
-    style={"width": "29rem", "height":'40rem'},
-)
 
-card6 = dbc.Card(
-    [
-        dbc.CardBody(
-            [
-                html.H4("Card title", className="card-title"),
-                html.P(
-                    "Some quick example text to build on the card title and "
-                    "make up the bulk of the card's content.",
-                    className="card-text",
-                ),
-                dcc.Dropdown(
-                    id='genders4',
-                    options=choice_list_gender,
-                    style={
-                "background": "#8cd98c",
-            },
-                    value="Both",
-                    clearable=False
-                ),
-            dcc.Graph(id='example-graph6')
-            ]
-        ),
-    ],
-    style={"width": "29rem", "height":'40rem'},
-)
-
-card7 = dbc.Card(
-    [
-        dbc.CardBody([
-            html.H4("Card title", className="card-title"),
-            html.P(
-            "Some quick example text to build on the card title and "
-            "make up the bulk of the card's content.",
-            className="card-text",
-        ),
-        dcc.Graph(
-                id='delivery-map',
-                figure=fig7,
-                style={"height": "28rem"},
-            )
-    ])
-    ],
-    style={"width": "29rem", "height": "40rem"},
-)
-
-card8 = dbc.Card(
-    [
-        dbc.CardBody(
-            [
-                html.H4("Card title", className="card-title"),
-                html.P(
-                    "Some quick example text to build on the card title and "
-                    "make up the bulk of the card's content.",
-                    className="card-text",
-                ),
-            dcc.Graph(id='example-graph7')
-            ]
-        ),
-    ],
-    style={"width": "29rem", "height":'40rem'},
-)
-
-card9 = dbc.Card(
-    [
-        dbc.CardBody(
-            [
-                html.H4("Card title", className="card-title"),
-                html.P(
-                    "Some quick example text to build on the card title and "
-                    "make up the bulk of the card's content.",
-                    className="card-text",
-                ),
-            dcc.Graph(id='example-graph8')
-            ]
-        ),
-    ],
-    style={"width": "29rem", "height":'40rem'},
-)
-
-row = html.Div(
-    [
-        dbc.Row(
-            [
-                dbc.Col(html.H4("some text")),
-                dbc.Col(html.H4("some text")),
-                dbc.Col(html.H4("some text")),
-            ]
-        ),
-    ], style = {'background-color': '#303030'}
-)
+## arranging the cards into 3 rows and 3 columns
 
 row2 = html.Div(
     [
@@ -299,6 +184,7 @@ row2 = html.Div(
     ]
 )
 
+## bringing all the components above together to build the content of the page
 
 layout2=html.Div(
     children=[
