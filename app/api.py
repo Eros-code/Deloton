@@ -20,9 +20,9 @@ def test():
     return "this is a test!"
 
 # Get a ride with a specific ID:
-@app.route("/ride/<int:user_id>", methods=["GET"])
-def get_user_ride(user_id):
-    df_filter = filter(lambda df_filter: df_filter["user_id"] == user_id, ride_data)
+@app.route("/ride/<int:session_id>", methods=["GET"])
+def get_user_ride(session_id):
+    df_filter = filter(lambda df_filter: df_filter["session_id"] == session_id, ride_data)
     return(dumps(list(df_filter)))
 
 #Get rider information (e.g. name, gender, age, avg. heart rate, number of rides):
@@ -31,14 +31,57 @@ def get_user(user_id):
     df_filter = filter(lambda df_filter: df_filter["user_id"] == user_id, user_data)
     return(dumps(list(df_filter)))
 
-# # Get all rides for a rider with a specific ID
+#Get rider information by gender (e.g. name, gender, age, avg. heart rate, number of rides):
+@app.route("/rider/<gender>", methods=["GET"])
+def get_user_gender(gender):
+    df_filter = filter(lambda df_filter: df_filter["gender"] == gender, user_data)
+    return(dumps(list(df_filter)))
+
+  
+#Get rides by gender:
+@app.route("/rides/<gender>", methods=["GET"])
+def get_ride_gender(gender):
+    df_filter = filter(lambda df_filter: df_filter["gender"] == gender, ride_data)
+    return(dumps(list(df_filter)))
+
+#Get rides by age or by an age range:
+@app.route("/rides", methods=["GET"])
+def get_ride_age():
+    args = request.args
+    result = args.get('age', type=str)
+    if '-' not in result:
+      df_filter = filter(lambda df_filter: df_filter["age"] == int(result), ride_data)
+      return(dumps(list(df_filter)))
+    else:
+      result_arr = result.split("-")
+      df_filter = filter(lambda df_filter: df_filter["age"] >= int(result_arr[0]) and df_filter["age"] <= int(result_arr[1]) , ride_data)
+      return(dumps(list(df_filter)))
+
+#Get all riders from specific location(s):
+@app.route("/rider", methods=["GET"])
+def locate_users():
+    args = request.args
+    result = args.get('location', type=str)
+
+    if ',' not in result:
+      df_filter = filter(lambda df_filter: df_filter["area"] == str(result), user_data)
+      return(dumps(list(df_filter)))
+    else:
+      result_arr = result.split(",")
+      location_list = []
+      for i in range(0, len(result_arr)):
+        df_filter = filter(lambda df_filter: df_filter["area"] == str(result_arr[i]), user_data)
+        location_list.append({str(result_arr[i]):list(df_filter)})
+    return(dumps(list(location_list)))
+
+## Get all rides for a rider with a specific ID
 @app.route("/rider/<int:user_id>/rides", methods=["GET"])
 def get_user_rides(user_id):
     df_filter = filter(lambda df_filter: df_filter["user_id"] == user_id, ride_data)
     return(json.dumps(list(df_filter)))
 
 
-# # Get all rides for a specific date
+## Get all rides for a specific date
 @app.route("/daily", methods=["GET"])
 def date():
   args = request.args
@@ -73,38 +116,13 @@ def date():
       df_filter = filter(lambda record: (record["start_year"], record['start_month'], record['start_day']) == (result_arr[0], result_arr[1], result_arr[2]), ride_data)
       return dumps(list(df_filter))
 
-
-
-#     query = """SELECT * FROM title_url_des WHERE description = '%s';""" %(result)
-#     tag_dict = {"story_by_tag" : db_select(query)}
-#   else:
-#     result_arr = result.split(",")
-#     query = """SELECT * FROM title_url_des WHERE description = '%s' """ %(result_arr[0])
-#     for i in range(1, len(result_arr)):
-#       or_string = """OR description = '%s' """ %(result_arr[i])
-#       query += or_string
-#     query += ";"
-#     tag_dict = {"story_by_tag" : db_select(query)}
+# # delete a ride with a specific ID:
+# @app.route("/ride/del/<int:session_id>", methods=["DELETE"])
+# def delete_ride(session_id):
+#     df_filter = filter(lambda df_filter: df_filter["session_id"] == session_id, ride_data)
+#     return("Ride was successfully deleted")
   
-#   return jsonify(tag_dict)
 
-
-####################################################################################
-###                                                                              ###
-### DELETE /ride/:id                                                             ###
-### Delete a with a specific ID ###                                              ###
-###                                                                              ###
-####################################################################################
 
 #http://127.0.0.1:5000/search?tags=Europe
 # GET /daily?date=01-01-2020 test
-
-# @app.route("/stories", methods=["GET"])
-# def stories():
-#   query = """SELECT stories.*,
-#   SUM(CASE direction WHEN 'up' THEN 1 WHEN 'down' THEN -1 ELSE 0 END) AS score
-#   FROM stories
-#   LEFT JOIN votes ON votes.story_id = stories.id
-#   GROUP BY stories.id;"""
-#   stories_dict = {"stories" : db_select(query)}
-#   return jsonify(stories_dict)
