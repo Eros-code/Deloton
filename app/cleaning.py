@@ -20,6 +20,21 @@ def df_creation():
     user_rows = []
     ride_rows = []
     session_id = 0
+    start_year = None
+    start_month = None
+    start_day = None 
+    start_time = None
+    age = None
+    ride_data = [None, None, None, None]
+    user_dict = {'user_id': None,
+                'name': None,
+                'gender': None,
+                'date_of_birth': None,
+                'bike_serial': None,
+                'original_source': None,
+                'height_cm': None,
+                'weight_kg': None}
+
     for log in data_json:
         if 'Getting user data from server' in log['log']:
             start_date = log['log'].split(' ')[0]
@@ -31,6 +46,7 @@ def df_creation():
         if 'data = ' in log['log']:
             data = data_regex.findall(log['log'])
             user_dict = ast.literal_eval(data[0])
+            age = datetime.datetime.now().year - datetime.datetime.fromtimestamp(user_dict['date_of_birth']/1000).year
             if user_dict['user_id'] not in existing_user:
                 existing_user.add(user_dict['user_id'])
                 name = user_dict['name'].split(' ')
@@ -43,7 +59,7 @@ def df_creation():
             ride_data = numbers_regex.findall(log['log'])
         elif 'Telemetry -' in log['log']:
             telemetry_data = numbers_regex.findall(log['log'])
-            ride_row = [session_id, user_dict['user_id'], start_year, start_month, start_day, start_time, user_dict['bike_serial'], user_dict['original_source'], ride_data[-2], ride_data[-1], telemetry_data[-3], telemetry_data[-2], telemetry_data[-1], user_dict['height_cm'], user_dict['weight_kg'], datetime.datetime.now().year - datetime.datetime.fromtimestamp(user_dict['date_of_birth']/1000).year, user_dict['gender']]
+            ride_row = [session_id, user_dict['user_id'], start_year, start_month, start_day, start_time, user_dict['bike_serial'], user_dict['original_source'], ride_data[-2], ride_data[-1], telemetry_data[-3], telemetry_data[-2], telemetry_data[-1], user_dict['height_cm'], user_dict['weight_kg'], age , user_dict['gender']]
             ride_rows.append(ride_row)
 
     # Dataframe creation from lists.
