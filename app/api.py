@@ -37,7 +37,11 @@ def get_user_gender(gender):
     df_filter = filter(lambda df_filter: df_filter["gender"] == gender, user_data)
     return(dumps(list(df_filter)))
 
-  
+#Get all rides:
+@app.route("/rides", methods=["GET"])
+def get_rides():
+    return(dumps(list(ride_data)))
+
 #Get rides by gender:
 @app.route("/rides/<gender>", methods=["GET"])
 def get_ride_gender(gender):
@@ -117,10 +121,18 @@ def date():
       return dumps(list(df_filter))
 
 # # delete a ride with a specific ID:
-# @app.route("/ride/del/<int:session_id>", methods=["DELETE"])
-# def delete_ride(session_id):
-#     df_filter = filter(lambda df_filter: df_filter["session_id"] == session_id, ride_data)
-#     return("Ride was successfully deleted")
+@app.route("/ride/del/<int:session_id>", methods=["GET"])
+def delete_ride(session_id):
+  try:
+    for i in ride_data:
+      if i['session_id'] == int(session_id):
+        ride_data.remove(i)
+    with open('Data/ride_data.json', 'w') as f:
+      f.write(ride_data)
+
+    return('ride successfully deleted')
+  except:
+    return('ride was not deleted')
   
 
 
