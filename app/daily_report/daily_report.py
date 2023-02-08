@@ -10,11 +10,27 @@ import kaleido
 import numpy as np
 import pgeocode
 from PIL import Image, ImageOps
+from assets.sql_wrapper import SQLConnection
+import os
+import dotenv
 
 # Reading data. **Needs to be changed to read from RDS**
-user_df = pd.read_json('./Data/users_data.json')
-ride_df = pd.read_json('./Data/ride_data.json')
-recent_rides_df = ride_df[(ride_df['start_time'] > datetime.now() - timedelta(hours = 24)) & (ride_df['start_time'] < datetime.now())]
+# user_df = pd.read_json('./Data/users_data.json')
+# ride_df = pd.read_json('./Data/ride_data.json')
+# recent_rides_df = ride_df[(ride_df['start_time'] > datetime.now() - timedelta(hours = 24)) & (ride_df['start_time'] < datetime.now())]
+
+# Read data from RDS.
+
+dotenv.load_dotenv(override=True)
+
+dbname = os.environ["DBNAME"]
+username = os.environ['SQL_USERNAME']
+host = os.environ['SQL_HOST']
+password = os.environ['SQL_PASSWORD']
+sql = SQLConnection(dbname, username, password)
+
+user_df = sql.q('SELECT * FROM users')
+rides_df = sql.q('SELECT * FROM users')
 
 # Processing
 max_individual_recent_rides = recent_rides_df.groupby(['start_time']).max()
@@ -73,7 +89,7 @@ pdf.cell(w = pw, h = 10, txt='', border = 0, ln = 1)
 pdf.set_font('Arial','',  11)
 pdf.multi_cell(w=0, h=5, txt = f"Total number of riders: {total_riders}" + '\n' + f"Average power produced per rider: {avg_power} W" + '\n' + f"Average heart rate: {avg_hrt} BPM", border=0)
 pdf.cell(w = pw, h = 90, txt='', border = 0, ln = 1)
-pdf.cell(w = pw, h = 10, txt="The locations of today's users are displayed below:", border = 0, ln = 1)
+pdf.cell(w = pw, h = 10, txt="Locations of today's rides:", border = 0, ln = 1)
 pdf.cell(w = pw, h = 95, txt='', border = 0, ln = 1)
 pdf.image('./daily_report/images/gender_counts.png', 
           x = m, y =80, w = pw/2 -0.5, h = 0, type = 'PNG')
