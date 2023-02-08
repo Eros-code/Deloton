@@ -4,6 +4,17 @@ import pandas as pd
 import re 
 import ast
 import datetime
+import os
+import dotenv
+from assets.sql_wrapper import SQLConnection
+
+dotenv.load_dotenv(override=True)
+
+dbname = os.environ["DBNAME"]
+username = os.environ['SQL_USERNAME']
+host = os.environ['SQL_HOST']
+password = os.environ['SQL_PASSWORD']
+sql = SQLConnection(dbname, username, password)
 
 # Load data from Kafka. **NEEDS TO BE CHANGED TO READ FROM RDS**
 data_json = data_json = json.load(open('Data/data.json', 'r'))
@@ -53,7 +64,7 @@ def df_creation():
                 if name[0] in stop_words:
                     name.pop(0)
                 address = user_dict['address'].split(',')
-                user_row = [user_dict['user_id'], name[0], name[1], user_dict['gender'], address[0], address[1], address[-1], str(datetime.datetime.fromtimestamp(user_dict['date_of_birth']/1000)), user_dict['email_address'], user_dict['height_cm'], user_dict['weight_kg'], str(datetime.datetime.fromtimestamp(user_dict['account_create_date']/1000))]
+                user_row = [user_dict['user_id'], name[0], name[1], user_dict['gender'], address[0], address[1], address[-1], str(datetime.datetime.fromtimestamp(user_dict['date_of_birth']/1000)), user_dict['email_address'], user_dict['height_cm'], user_dict['weight_kg'], str(datetime.datetime.fromtimestamp(user_dict['account_create_date']/1000)), str(user_dict['original_source'])]
                 user_rows.append(user_row)
         elif 'Ride -' in log['log']:
             ride_data = numbers_regex.findall(log['log'])
@@ -63,11 +74,24 @@ def df_creation():
             ride_rows.append(ride_row)
 
     # Dataframe creation from lists.
-    user_df = pd.DataFrame(user_rows, columns=['user_id', 'first_name', 'last_name', 'gender', 'street', 'area', 'postcode', 'd_o_b', 'email', 'height', 'weight', 'account_creation_date'])
+    user_df = pd.DataFrame(user_rows, columns=['user_id', 'first_name', 'last_name', 'gender', 'street', 'area', 'postcode', 'd_o_b', 'email', 'height', 'weight', 'account_creation_date', 'original_source'])
     ride_df = pd.DataFrame(ride_rows, columns=['session_id', 'user_id', 'start_year', 'start_month', 'start_day', 'start_time', 'serial_no', 'source', 'duration', 'resistance', 'heart_rate', 'rpm', 'power', 'height', 'weight', 'age', 'gender'])
     return user_df, ride_df
 
 user_df, ride_df = df_creation()
+
+users = user_df[["user_id",'first_name','last_name','gender','d_o_b','height','weight','original_source']]
+users = users.rename({'d_o_b':'date_of_birth'}, axis='columns')
+
+# creating column list for insertion
+cols = ", ".join([str(i) for i in users.columns.tolist()])
+
+# Insert DataFrame recrds one by one.
+for i,row in users.iterrows():
+    rows = "','".join([str(i) for i in row])
+    sql.q("""INSERT INTO users (%s) VALUES ('%s') ON CONFLICT DO NOTHING"""%(cols, rows))
+
+print('rows inserted into user table in rds')
 
 # Write data to working directory. **NEEDS TO BE CHANGED TO WRITE TO RDS**
 df1 = user_df.to_json(orient = 'records')
