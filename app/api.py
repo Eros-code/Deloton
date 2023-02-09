@@ -17,7 +17,7 @@ ride_data = load(ride_df)
 
 @app.route("/", methods=["GET"])
 def test():
-    return "this is a test!"
+    return "Welcome to the Deloton API!"
 
 # Get a ride with a specific ID:
 @app.route("/ride/<int:session_id>", methods=["GET"])

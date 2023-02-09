@@ -101,9 +101,8 @@ card1 = dbc.Card(
     [
         dbc.CardBody(
             [
-                html.H4("", className=""),
+                html.H4(className="card-title"),
                 html.P(
-                    "",
                     className="card-text",
                 ),
             dcc.Graph(id='example-graph1', figure=fig1)
@@ -117,9 +116,8 @@ card2 = dbc.Card(
     [
         dbc.CardBody(
             [
-                html.H4("", className="card-title"),
+                html.H4(className="card-title"),
                 html.P(
-                    "",
                     className="card-text",
                 ),
                 dcc.Dropdown(
@@ -142,9 +140,8 @@ card3 = dbc.Card(
     [
         dbc.CardBody(
             [
-                html.H4("", className="card-title"),
+                html.H4(className="card-title"),
                 html.P(
-                    "",
                     className="card-text",
                 ),
                 dcc.Dropdown(
@@ -167,9 +164,8 @@ card4 = dbc.Card(
     [
         dbc.CardBody(
             [
-                html.H4("", className="card-title"),
+                html.H4(className="card-title"),
                 html.P(
-                    "",
                     className="card-text",
                 ),
             dcc.Graph(id='example-graph4', figure=fig4)
@@ -183,9 +179,8 @@ card5 = dbc.Card(
     [
         dbc.CardBody(
             [
-                html.H4("", className="card-title"),
+                html.H4(className="card-title"),
                 html.P(
-                    "",
                     className="card-text",
                 ),
                 dcc.Dropdown(
@@ -208,9 +203,8 @@ card6 = dbc.Card(
     [
         dbc.CardBody(
             [
-                html.H4("", className="card-title"),
+                html.H4(className="card-title"),
                 html.P(
-                    "",
                     className="card-text",
                 ),
                 dcc.Dropdown(
@@ -232,9 +226,8 @@ card6 = dbc.Card(
 card7 = dbc.Card(
     [
         dbc.CardBody([
-            html.H4("", className="card-title"),
+            html.H4(className="card-title"),
             html.P(
-            "",
             className="card-text",
         ),
         dcc.Graph(
@@ -251,9 +244,8 @@ card8 = dbc.Card(
     [
         dbc.CardBody(
             [
-                html.H4("", className="card-title"),
+                html.H4(className="card-title"),
                 html.P(
-                    "",
                     className="card-text",
                 ),
             dcc.Graph(id='example-graph7')
@@ -267,9 +259,10 @@ card9 = dbc.Card(
     [
         dbc.CardBody(
             [
-                html.H4("", className="card-title"),
+                html.H4(className="card-title"),
                 html.P(
-                    "",
+                    "Some quick example text to build on the card title and "
+                    "make up the bulk of the card's content.",
                     className="card-text",
                 ),
             dcc.Graph(id='example-graph8')
@@ -310,9 +303,9 @@ row2 = html.Div(
         html.Br(),
         dbc.Row(
             [
-                dbc.Col(html.Div()),
+                dbc.Col(),
                 dbc.Col(html.Div(card7)),
-                dbc.Col(html.Div()),
+                dbc.Col(),
             ])
     ]
 )
